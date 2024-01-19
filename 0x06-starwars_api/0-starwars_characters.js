@@ -7,13 +7,17 @@ request(`https://swapi-api.alx-tools.com/api/films/${process.argv[2]}/`, (error,
     return;
   }
   const characters = JSON.parse(body).characters;
-  characters.forEach((character) => {
-    request(character, (error1, response1, body1) => {
+  const charactersName = characters.map(
+    url => new Promise((resolve, reject) => {
+    request(url, (error1, response1, body1) => {
       if (error1) {
-        console.error('error:', error1);
-        return;
+        reject(error1);
       }
-      console.log(JSON.parse(body1).name);
+      resolve(JSON.parse(body1).name);
     });
-  });
+  }));
+
+  Promise.all(charactersName)
+    .then(names => console.log(names.join('\n')))
+    .catch(allErr => console.log('error:', allErr));
 });
